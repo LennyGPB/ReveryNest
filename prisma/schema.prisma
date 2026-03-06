@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String   @unique
+  password  String
+  activeLucid Boolean @default(false)
+  role  Role   @default(USER)
+  plan          Plan      @default(FREE)
+  createdAt DateTime @default(now())
+
+  dreams    Dream[]
+  lucidRitual LucidRitual?
+  passwordResetTokens PasswordResetToken[]
+}
+
+model Dream {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  content       String
+  transcription String?
+  moods         String[]
+  intensity     Int?
+  tags          Json?
+  analysis      Json?
+  imageURL      String?
+  isLucid       Boolean  @default(false)
+  
+  // Relation avec l'utilisateur
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+model Insight {
+  id            String   @id @default(uuid())
+  title         String
+  preview       String
+  fullContent   String
+  category      String?
+  publishedDate DateTime @default(now())
+  isActive      Boolean @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model LucidRitual {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  ritual      Json
+  signals     Json
+  lastDreamAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
