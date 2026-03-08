@@ -169,12 +169,12 @@ RÈGLES STRICTES :
 - La phrase doit exprimer une prise de conscience.
 
 Structure recommandée :
-"Si je vois {signal}, je saurai que je rêve."
+"Quand je verrai {signal}, je me demanderai si je rêve."
 
 Si plusieurs signaux sont fournis, utilise uniquement le plus pertinent.
 Si aucun signal n’est pertinent, retourne exactement :
 {
-  "ritual": "Cette nuit, je saurai que je rêve."
+  "ritual": "Cette nuit, je me demanderai si je rêve."
 }
 
 
