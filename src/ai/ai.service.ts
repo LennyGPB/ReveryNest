@@ -1,16 +1,21 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { aiPrompt, aiPromptLucidSignals } from './ai_prompt';
+import { aiPrompt, aiPrompt2, aiPromptLucidSignals } from './ai_prompt';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import Anthropic from '@anthropic-ai/sdk'
 
 @Injectable()
 export class AiService {
   private openai: OpenAI;
+  private anthropic: Anthropic;
 
   constructor(private configService: ConfigService, private cloudinaryService: CloudinaryService) {
     this.openai = new OpenAI({
       apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+    });
+    this.anthropic = new Anthropic({
+      apiKey: this.configService.get<string>('ANTHROPIC_API_KEY'),
     });
   }
 
@@ -32,6 +37,40 @@ export class AiService {
 
     } catch (error) {
 
+      console.error("AI analyzeDream error:", error);
+
+      return {
+        intensity: 3,
+        tags: [],
+        summary: null
+      };
+    }
+  }
+
+  async analyzeDreamClaude(content: string): Promise<any> {
+    try {
+      const safeContent = content.slice(0, 1500);
+
+      const response = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1024,
+        system: aiPrompt2,
+        messages: [{ role: 'user', content: safeContent }],
+      });
+
+      const text = response.content[0].type === 'text' 
+        ? response.content[0].text 
+        : '';
+
+      const clean = text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+
+      return JSON.parse(clean || '{}');
+
+    } catch (error) {
       console.error("AI analyzeDream error:", error);
 
       return {
@@ -64,11 +103,10 @@ export class AiService {
   async generateDreamImage(dreamContent: string): Promise<string> {
 
     try {
-
-      const safeDream = dreamContent.slice(0, 1000);
+      const safeContent = dreamContent.slice(0, 1500);
 
       const prompt = `Create a cinematic, poetic digital illustration inspired by this dream:
-      "${safeDream}"
+      "${safeContent}"
 
       Style: soft lighting, subtle shadows, emotional atmosphere, slightly surreal but grounded in reality.
       Color palette: deep blues, muted purples, warm golden highlights.
@@ -112,7 +150,7 @@ export class AiService {
   async analyseLucidRitual(signalsData: any): Promise<any> {
     try {
       const response = await this.openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",

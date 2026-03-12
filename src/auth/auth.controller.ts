@@ -29,4 +29,9 @@ export class AuthController {
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto.email)
   }
+
+  @Post("push-token")
+  async savePushToken(@Request() req, @Body() body: { token: string }) {
+    return this.authService.savePushToken(req.user.id, body.token);
+  }
 }

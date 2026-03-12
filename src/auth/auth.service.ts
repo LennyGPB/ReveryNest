@@ -30,7 +30,7 @@ export class AuthService {
       const payload = { email: user.email, sub: user.id, plan: user.plan, activeLucid: user.activeLucid };
       return {
         access_token: this.jwtService.sign(payload),
-        user: { id: user.id, email: user.email, plan: user.plan, activeLucid: user.activeLucid },
+        user: { id: user.id, email: user.email, plan: user.plan, activeLucid: user.activeLucid, name: user.name },
       };
     }
     throw new UnauthorizedException('Identifiants invalides');
@@ -72,5 +72,14 @@ export class AuthService {
     // email envoyé ici (on fera ça après)
 
     return { message: "Reset email sent" }
+  }
+
+  async savePushToken(userId: string, token: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        pushToken: token,
+      },
+    });
   }
 }

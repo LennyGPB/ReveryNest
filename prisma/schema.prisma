@@ -19,11 +19,12 @@ enum Plan {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  name      String   @unique
+  name      String?  
   password  String
   activeLucid Boolean @default(false)
   role  Role   @default(USER)
   plan          Plan      @default(FREE)
+  pushToken String?
   createdAt DateTime @default(now())
 
   dreams    Dream[]

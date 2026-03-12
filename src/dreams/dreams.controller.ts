@@ -62,6 +62,7 @@ export class DreamsController {
 
     await this.dreamsService.checkImageUsage(req.user.id);
     const imageUrl = await this.aiService.generateDreamImage(dream.content);
-    return this.dreamsService.update(req.user.id, id, imageUrl);
+    await this.dreamsService.update(req.user.id, id, imageUrl);
+    return { imageURL: imageUrl };
   }
 }

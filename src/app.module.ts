@@ -11,9 +11,11 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LucidModule } from './lucid/lucid.module';
 import { MailerService } from './mailer/mailer.service';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { RevenuecatModule } from './revenuecat/revenuecat.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
-  imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]) , ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), AiModule, AuthModule, DreamsModule, CloudinaryModule, InsightModule, LucidModule],
+  imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]) , ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), AiModule, AuthModule, DreamsModule, CloudinaryModule, InsightModule, LucidModule, RevenuecatModule, NotificationsModule],
   controllers: [AppController],
   providers: [AppService, MailerService],
 })

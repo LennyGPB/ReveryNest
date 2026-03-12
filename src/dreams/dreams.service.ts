@@ -14,7 +14,7 @@ export class DreamsService {
     try {
       await this.checkAiUsage(userId);
       const safeContent = content.slice(0, 1500); // Limiter à 1500 caractères 
-      analysis = await this.aiService.analyzeDream(safeContent);
+      analysis = await this.aiService.analyzeDreamClaude(safeContent);
     } catch (error) {
       console.error("AI analysis failed:", error);
 
