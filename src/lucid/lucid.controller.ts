@@ -9,7 +9,7 @@ import { LimitType } from 'src/auth/guards/limit.decorator';
 export class LucidController {
     constructor(private readonly lucidService: LucidService) {}
 
-    @UseGuards(PremiumGuard)
+    //@UseGuards(PremiumGuard)
     @LimitType('LUCID')
     @Post('activate')
     activateLucid(@Request() req) {

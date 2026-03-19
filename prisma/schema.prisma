@@ -22,6 +22,7 @@ model User {
   name      String?  
   password  String
   activeLucid Boolean @default(false)
+  emailVerified   DateTime?
   role  Role   @default(USER)
   plan          Plan      @default(FREE)
   pushToken String?

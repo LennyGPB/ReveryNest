@@ -15,7 +15,7 @@ import { RevenuecatModule } from './revenuecat/revenuecat.module';
 import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
-  imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]) , ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), AiModule, AuthModule, DreamsModule, CloudinaryModule, InsightModule, LucidModule, RevenuecatModule, NotificationsModule],
+  imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 50 }]) , ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), AiModule, AuthModule, DreamsModule, CloudinaryModule, InsightModule, LucidModule, RevenuecatModule, NotificationsModule],
   controllers: [AppController],
   providers: [AppService, MailerService],
 })

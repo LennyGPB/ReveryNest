@@ -1,26 +1,45 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service'; // Retrait du .js
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
+import * as validator from 'validator';
 
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async register(email: string, name: string, pass: string) {
+  async register(email: string, pass: string, name?: string) {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    if (!validator.isEmail(normalizedEmail)) {
+      throw new BadRequestException('Email invalide');
+    }
+
+    if (pass.length < 6) {
+      throw new BadRequestException('Mot de passe trop court (min 6 caractères)');
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('Email déjà utilisé');
+    }
+
     const hashedPassword = await bcrypt.hash(pass, 10);
 
-  const newUser = await (this.prisma as any).user.create({
+    const newUser = await this.prisma.user.create({
       data: {
-        email,
-        name: name,
+        email: normalizedEmail,
+        name: name?.trim() || 'Rêveur',
         password: hashedPassword,
-        plan: 'FREE', // On s'assure qu'il est bien en FREE au début
+        plan: 'FREE',
       },
     });
 
-    return this.login(newUser.email, pass); // On peut directement connecter l'utilisateur après l'inscription
+    return this.login(normalizedEmail, pass);
   }
 
   async login(email: string, pass: string) {
@@ -82,4 +101,6 @@ export class AuthService {
       },
     });
   }
+
+
 }
