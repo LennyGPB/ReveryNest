@@ -102,5 +102,13 @@ export class AuthService {
     });
   }
 
-
+  async healthCheck() {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`
+      return { status: 'ok' }
+    } catch (error) {
+      const details = error instanceof Error ? error.message : 'Unknown error'
+      return { status: 'error', details }
+    }
+  }
 }

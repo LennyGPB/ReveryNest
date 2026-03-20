@@ -39,4 +39,9 @@ export class AuthController {
     return this.authService.savePushToken(req.user.id, body.token);
   }
 
+  @Get('health')
+  async healthCheck() {
+    return this.authService.healthCheck();
+  }
+
 }
