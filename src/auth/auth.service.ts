@@ -12,7 +12,7 @@ export class AuthService {
   async register(email: string, pass: string, name?: string) {
     const normalizedEmail = email.toLowerCase().trim();
 
-    if (!validator.isEmail(normalizedEmail)) {
+    if (!validator.isEmail(normalizedEmail)) { 
       throw new BadRequestException('Email invalide');
     }
 
