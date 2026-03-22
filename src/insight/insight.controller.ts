@@ -18,7 +18,13 @@ export class InsightController {
     }
 
     @Get('daily')
-    getRandomActive() {
-        return this.insightService.findDailyActive();
+    async getRandomActive() {
+        const insight = await this.insightService.findDailyActive();
+        
+        if (!insight) {
+            return { insight: null, message: 'Aucun insight disponible' };
+        }
+        
+        return insight;
     }
 }
