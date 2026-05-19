@@ -115,27 +115,18 @@ export class AiService {
       No text, no distortion, no exaggerated fantasy elements.
       `;
 
-      const response = await this.openai.images.generate({
-        model: "gpt-image-1",
-        prompt,
-        n: 1,
-        size: "1024x1536",
-      });
+    const response = await this.openai.images.generate({
+      model: "gpt-image-1",
+      prompt,
+      n: 1,
+      size: "1024x1536",
+    });
 
-      if (!response.data || !response.data[0]) {
-        throw new BadRequestException("Image generation failed");
-      }
+    const b64 = response.data?.[0]?.b64_json;
+    if (!b64) throw new BadRequestException("Image generation failed");
 
-      const temporaryUrl = response.data[0].url;
-
-      if (!temporaryUrl) {
-        throw new BadRequestException("Image generation failed");
-      }
-
-      const permanentUrl =
-        await this.cloudinaryService.uploadImageFromUrl(temporaryUrl);
-
-      return permanentUrl;
+    const permanentUrl = await this.cloudinaryService.uploadImageFromBase64(b64);
+    return permanentUrl;
 
     } catch (error) {
 

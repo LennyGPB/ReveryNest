@@ -15,4 +15,12 @@ export class CloudinaryService {
       throw new Error("Échec de l'upload vers Cloudinary");
     }
   }
+
+  async uploadImageFromBase64(b64: string): Promise<string> {
+    const result = await cloudinary.uploader.upload(
+      `data:image/png;base64,${b64}`,
+      { folder: 'revery/dreams' }
+    );
+    return result.secure_url;
+  }
 }
