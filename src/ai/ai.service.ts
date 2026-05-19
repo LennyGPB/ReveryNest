@@ -119,7 +119,7 @@ export class AiService {
         model: "gpt-image-1",
         prompt,
         n: 1,
-        size: "1024x1792",
+        size: "1024x1536",
       });
 
       if (!response.data || !response.data[0]) {
