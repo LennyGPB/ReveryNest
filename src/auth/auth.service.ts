@@ -63,7 +63,7 @@ export class AuthService {
 
     return (this.prisma as any).user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, name: true, plan: true, activeLucid: true }, 
+      select: { id: true, email: true, name: true, plan: true, activeLucid: true, streak: true }, 
     });
   }
 

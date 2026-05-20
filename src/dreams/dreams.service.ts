@@ -1,46 +1,77 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AiService } from 'src/ai/ai.service';
 import { LucidService } from 'src/lucid/lucid.service';
-import { error } from 'console';
 
 @Injectable()
 export class DreamsService {
   constructor(private prisma: PrismaService, private aiService: AiService, private lucidService: LucidService) {}
 
-  async create( userId: string, content: string, moods: string[], isLucid: boolean,) {
-    let analysis;
+  async create(userId: string, content: string, moods: string[], isLucid: boolean) {
+      let analysis;
 
-    try {
-      await this.checkAiUsage(userId);
-      const safeContent = content.slice(0, 1500); // Limiter à 1500 caractères 
-      analysis = await this.aiService.analyzeDreamClaude(safeContent);
-    } catch (error) {
-      console.error("AI analysis failed:", error);
+      if (content.trim().length < 10) {
+        throw new BadRequestException('Le rêve doit contenir au moins 10 caractères.');
+      }
 
-      analysis = {
-        intensity: 3,
-        tags: null,
-      };
-    }
+      try {
+        await this.checkAiUsage(userId);
+        const safeContent = content.slice(0, 1500);
+        analysis = await this.aiService.analyzeDreamClaude(safeContent);
+      } catch (error) {
+        console.error("AI analysis failed:", error);
+        analysis = { intensity: 3, tags: null };
+      }
 
-    const dream = await this.prisma.dream.create({
-      data: {
-        content,
-        moods,
-        userId,
-        intensity: analysis.intensity ?? 3,
-        analysis,
-        tags: analysis.tags ?? null,
-        isLucid,
-      },
-    });
+      const dream = await this.prisma.dream.create({
+        data: {
+          content,
+          moods,
+          userId,
+          intensity: analysis.intensity ?? 3,
+          analysis,
+          tags: analysis.tags ?? null,
+          isLucid,
+        },
+      });
 
-    if (dream.tags) {
-      this.lucidService.getNewRituals(userId).catch(() => {});
-    }
+      // Calcul du streak
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    return dream;
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      let newStreak = 1;
+
+      if (user?.lastDreamDate) {
+        const last = new Date(user.lastDreamDate);
+        last.setHours(0, 0, 0, 0);
+
+        if (last.getTime() === today.getTime()) {
+          // Déjà enregistré aujourd'hui → on ne touche pas au streak
+          newStreak = user.streak;
+        } else if (last.getTime() === yesterday.getTime()) {
+          // Hier → on incrémente
+          newStreak = user.streak + 1;
+        }
+        // Sinon → streak cassé, repart à 1
+      }
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          streak: newStreak,
+          lastDreamDate: new Date(),
+        },
+      });
+
+      if (dream.tags) {
+        this.lucidService.getNewRituals(userId).catch(() => {});
+      }
+
+      return { ...dream, streak: newStreak };
   }
 
   async findAllByUser(userId: string) {
