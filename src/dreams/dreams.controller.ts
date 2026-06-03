@@ -35,6 +35,12 @@ export class DreamsController {
     return this.dreamsService.findLastLucidByUser(req.user.id);
   }
 
+  @Get('public')
+  @UseGuards(JwtAuthGuard)
+  getPublicDreams() {
+      return this.dreamsService.getPublicDreams();
+  }
+
   @Get(':id')
   findOne(@Request() req, @Param('id', new ParseUUIDPipe()) id: string) { // On utilise @Param ici, pas @Body
     return this.dreamsService.findOne(req.user.id, id);
@@ -70,11 +76,5 @@ export class DreamsController {
   @UseGuards(JwtAuthGuard)
   sharePublic(@Param('id') id: string, @Request() req) {
       return this.dreamsService.sharePublic(id, req.user.id);
-  }
-
-  @Get('public')
-  @UseGuards(JwtAuthGuard)
-  getPublicDreams() {
-      return this.dreamsService.getPublicDreams();
   }
 }
