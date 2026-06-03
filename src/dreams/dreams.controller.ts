@@ -65,4 +65,16 @@ export class DreamsController {
     await this.dreamsService.update(req.user.id, id, imageUrl);
     return { imageURL: imageUrl };
   }
+
+  @Post(':id/share')
+  @UseGuards(JwtAuthGuard)
+  sharePublic(@Param('id') id: string, @Request() req) {
+      return this.dreamsService.sharePublic(id, req.user.id);
+  }
+
+  @Get('public')
+  @UseGuards(JwtAuthGuard)
+  getPublicDreams() {
+      return this.dreamsService.getPublicDreams();
+  }
 }

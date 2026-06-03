@@ -151,4 +151,31 @@ export class DreamsService {
       throw new ForbiddenException("Limite d'images atteinte aujourd'hui.");
     }
   }
+
+  async sharePublic(dreamId: string, userId: string) {
+      const dream = await this.prisma.dream.findUnique({ where: { id: dreamId } });
+      if (!dream || dream.userId !== userId) throw new ForbiddenException();
+      
+      return this.prisma.dream.update({
+          where: { id: dreamId },
+          data: { isPublic: true },
+      });
+  }
+
+  async getPublicDreams() {
+      return this.prisma.dream.findMany({
+          where: { isPublic: true },
+          orderBy: { createdAt: 'desc' },
+          select: {
+              id: true,
+              content: true,
+              moods: true,
+              intensity: true,
+              analysis: true,
+              imageURL: true,
+              createdAt: true,
+              // PAS userId pour garder l'anonymat
+          },
+      });
+  }
 }

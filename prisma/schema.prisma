@@ -47,6 +47,7 @@ model Dream {
   analysis      Json?
   imageURL      String?
   isLucid       Boolean  @default(false)
+  isPublic Boolean @default(false)
   
   // Relation avec l'utilisateur
   userId        String
