@@ -6,6 +6,8 @@ import { PremiumGuard } from 'src/auth/guards/premium.guard';
 import { LimitType } from 'src/auth/guards/limit.decorator';
 import { CreateDreamDto } from './dto/create-dream.dto';
 import { Throttle } from '@nestjs/throttler';
+import { Res } from '@nestjs/common';
+import type { Response } from 'express';
 
 @Controller('dreams')
 @UseGuards(JwtAuthGuard) 
@@ -76,5 +78,24 @@ export class DreamsController {
   @UseGuards(JwtAuthGuard)
   sharePublic(@Param('id') id: string, @Request() req) {
       return this.dreamsService.sharePublic(id, req.user.id);
+  }
+
+  @Get(':id/tts')
+  async getTTS(@Request() req, @Param('id', new ParseUUIDPipe()) id: string, @Res() res: Response) {
+      const dream = await this.dreamsService.findOne(req.user.id, id);
+      if (!dream) throw new NotFoundException("Rêve non trouvé");
+
+      const analysis = dream.analysis as any;
+      const text = analysis?.interpretation || analysis?.text;
+      if (!text) throw new BadRequestException("Aucune interprétation disponible");
+
+      const audioBuffer = await this.aiService.generateSpeech(text);
+
+      res.set({
+          'Content-Type': 'audio/mpeg',
+          'Content-Length': audioBuffer.length,
+      });
+
+      res.send(audioBuffer);
   }
 }

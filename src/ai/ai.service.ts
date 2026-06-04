@@ -168,4 +168,15 @@ export class AiService {
       throw new InternalServerErrorException("AI ritual generation failed");
     }
   }
+
+  async generateSpeech(text: string): Promise<Buffer> {
+      const response = await this.openai.audio.speech.create({
+          model: 'tts-1',
+          voice: 'nova',
+          input: text.slice(0, 4096),
+      });
+
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+  }
 }
