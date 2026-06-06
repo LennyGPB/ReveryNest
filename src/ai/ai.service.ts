@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { aiPrompt, aiPrompt2, aiPromptLucidSignals } from './ai_prompt';
+import { aiPrompt, aiPrompt2, aiPromptLucidSignals, aiPromptJungian, aiPromptSpiritual, aiPromptTherapeutic} from './ai_prompt';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import Anthropic from '@anthropic-ai/sdk'
 
@@ -47,38 +47,41 @@ export class AiService {
     }
   }
 
-  async analyzeDreamClaude(content: string): Promise<any> {
-    try {
-      const safeContent = content.slice(0, 1500);
+  async analyzeDreamClaude(content: string, type: string = 'global'): Promise<any> {
+      try {
+          const safeContent = content.slice(0, 1500);
 
-      const response = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1024,
-        system: aiPrompt2,
-        messages: [{ role: 'user', content: safeContent }],
-      });
+          const promptMap: { [key: string]: string } = {
+              'global': aiPrompt2,
+              'jungian': aiPromptJungian,
+              'spiritual': aiPromptSpiritual,
+              'therapeutic': aiPromptTherapeutic,
+          };
 
-      const text = response.content[0].type === 'text' 
-        ? response.content[0].text 
-        : '';
+          const systemPrompt = promptMap[type] || aiPrompt2;
 
-      const clean = text
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```\s*$/i, '')
-        .trim();
+          const response = await this.anthropic.messages.create({
+              model: 'claude-sonnet-4-5',
+              max_tokens: 1024,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: safeContent }],
+          });
 
-      return JSON.parse(clean || '{}');
+          const text = response.content[0].type === 'text'
+              ? response.content[0].text : '';
 
-    } catch (error) {
-      console.error("AI analyzeDream error:", error);
+          const clean = text
+              .replace(/^```json\s*/i, '')
+              .replace(/^```\s*/i, '')
+              .replace(/```\s*$/i, '')
+              .trim();
 
-      return {
-        intensity: 3,
-        tags: [],
-        summary: null
-      };
-    }
+          return JSON.parse(clean || '{}');
+
+      } catch (error) {
+          console.error("AI analyzeDream error:", error);
+          return { intensity: 3, tags: [], summary: null };
+      }
   }
 
   async transcribeAudio(file: Express.Multer.File): Promise<string> {

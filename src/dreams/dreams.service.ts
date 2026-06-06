@@ -7,32 +7,40 @@ import { LucidService } from 'src/lucid/lucid.service';
 export class DreamsService {
   constructor(private prisma: PrismaService, private aiService: AiService, private lucidService: LucidService) {}
 
-  async create(userId: string, content: string, moods: string[], isLucid: boolean) {
+  async create(userId: string, content: string, moods: string[], isLucid: boolean, interpretationType: string = 'global') {
       let analysis;
 
       if (content.trim().length < 10) {
-        throw new BadRequestException('Le rêve doit contenir au moins 10 caractères.');
+          throw new BadRequestException('Le rêve doit contenir au moins 10 caractères.');
+      }
+
+      // Vérification PRO pour les types premium
+      if (interpretationType !== 'global') {
+          const userCheck = await this.prisma.user.findUnique({ where: { id: userId } });
+          if (userCheck?.plan !== 'PRO') {
+              throw new ForbiddenException("Les interprétations avancées sont réservées aux membres PRO.");
+          }
       }
 
       try {
-        await this.checkAiUsage(userId);
-        const safeContent = content.slice(0, 1500);
-        analysis = await this.aiService.analyzeDreamClaude(safeContent);
+          await this.checkAiUsage(userId);
+          const safeContent = content.slice(0, 1500);
+          analysis = await this.aiService.analyzeDreamClaude(safeContent, interpretationType);
       } catch (error) {
-        console.error("AI analysis failed:", error);
-        analysis = { intensity: 3, tags: null };
+          console.error("AI analysis failed:", error);
+          analysis = { intensity: 3, tags: null };
       }
 
       const dream = await this.prisma.dream.create({
-        data: {
-          content,
-          moods,
-          userId,
-          intensity: analysis.intensity ?? 3,
-          analysis,
-          tags: analysis.tags ?? null,
-          isLucid,
-        },
+          data: {
+              content,
+              moods,
+              userId,
+              intensity: analysis.intensity ?? 3,
+              analysis,
+              tags: analysis.tags ?? null,
+              isLucid,
+          },
       });
 
       // Calcul du streak
@@ -46,29 +54,26 @@ export class DreamsService {
       let newStreak = 1;
 
       if (user?.lastDreamDate) {
-        const last = new Date(user.lastDreamDate);
-        last.setHours(0, 0, 0, 0);
+          const last = new Date(user.lastDreamDate);
+          last.setHours(0, 0, 0, 0);
 
-        if (last.getTime() === today.getTime()) {
-          // Déjà enregistré aujourd'hui → on ne touche pas au streak
-          newStreak = user.streak;
-        } else if (last.getTime() === yesterday.getTime()) {
-          // Hier → on incrémente
-          newStreak = user.streak + 1;
-        }
-        // Sinon → streak cassé, repart à 1
+          if (last.getTime() === today.getTime()) {
+              newStreak = user.streak;
+          } else if (last.getTime() === yesterday.getTime()) {
+              newStreak = user.streak + 1;
+          }
       }
 
       await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          streak: newStreak,
-          lastDreamDate: new Date(),
-        },
+          where: { id: userId },
+          data: {
+              streak: newStreak,
+              lastDreamDate: new Date(),
+          },
       });
 
       if (dream.tags) {
-        this.lucidService.getNewRituals(userId).catch(() => {});
+          this.lucidService.getNewRituals(userId).catch(() => {});
       }
 
       return { ...dream, streak: newStreak };

@@ -19,7 +19,7 @@ export class DreamsController {
   @Post()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   create(@Request() req, @Body() dto: CreateDreamDto) {
-    return this.dreamsService.create(req.user.id, dto.content, dto.moods ?? [], dto.isLucid ?? false);
+    return this.dreamsService.create(req.user.id, dto.content, dto.moods ?? [], dto.isLucid ?? false, dto.interpretationType ?? 'global');
   }
 
   @Get()

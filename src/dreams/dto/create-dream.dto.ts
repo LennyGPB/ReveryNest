@@ -21,4 +21,5 @@ export class CreateDreamDto {
   @IsBoolean()
   @IsOptional()
   isLucid?: boolean;
+  interpretationType?: string;
 }
