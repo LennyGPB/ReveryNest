@@ -26,6 +26,7 @@ model User {
   role  Role   @default(USER)
   plan          Plan      @default(FREE)
   pushToken String?
+  imageStyle String @default("cinematic")
   createdAt DateTime @default(now())
 
   streak        Int      @default(0)

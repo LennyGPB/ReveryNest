@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { aiPrompt, aiPrompt2, aiPromptLucidSignals, aiPromptJungian, aiPromptSpiritual, aiPromptTherapeutic} from './ai_prompt';
+import { aiPrompt, aiPrompt2, aiPromptLucidSignals, aiPromptJungian, aiPromptSpiritual, aiPromptTherapeutic, IMAGE_STYLES} from './ai_prompt';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import Anthropic from '@anthropic-ai/sdk'
 
@@ -103,20 +103,20 @@ export class AiService {
     }
   }
 
-  async generateDreamImage(dreamContent: string): Promise<string> {
+  async generateDreamImage(dreamContent: string, style: string = 'cinematic'): Promise<string> {
 
     try {
-      const safeContent = dreamContent.slice(0, 1500);
+        const safeContent = dreamContent.slice(0, 1500);
+        const styleInstructions = IMAGE_STYLES[style] || IMAGE_STYLES.cinematic;
 
-      const prompt = `Create a cinematic, poetic digital illustration inspired by this dream:
-      "${safeContent}"
+        const prompt = `Create a digital illustration inspired by this dream:
+        "${safeContent}"
 
-      Style: soft lighting, subtle shadows, emotional atmosphere, slightly surreal but grounded in reality.
-      Color palette: deep blues, muted purples, warm golden highlights.
-      Mood: introspective, calm, slightly mysterious.
-      Composition: single main subject, clear focal point, minimal visual noise.
-      No text, no distortion, no exaggerated fantasy elements.
-      `;
+        ${styleInstructions}
+        Composition: single main subject, clear focal point, minimal visual noise.
+        No text, no distortion, no exaggerated fantasy elements.
+        IMPORTANT: Safe for work only. No nudity, no sexual content, no violence.
+        `;
 
     const response = await this.openai.images.generate({
       model: "gpt-image-1",

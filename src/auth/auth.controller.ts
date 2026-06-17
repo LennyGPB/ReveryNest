@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Request, UseGuards, ForbiddenException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { PrismaService } from 'src/prisma.service';
@@ -42,6 +42,20 @@ export class AuthController {
   @Get('health')
   async healthCheck() {
     return this.authService.healthCheck();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('image-style')
+  async setImageStyle(@Request() req, @Body() body: { style: string }) {
+      const user = await this.prisma.user.findUnique({ where: { id: req.user.id } });
+      if (user?.plan !== 'PRO') {
+          throw new ForbiddenException("Réservé aux membres PRO.");
+      }
+      
+      return this.prisma.user.update({
+          where: { id: req.user.id },
+          data: { imageStyle: body.style },
+      });
   }
 
 }

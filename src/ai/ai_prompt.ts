@@ -432,3 +432,29 @@ Rédige un paragraphe de 4 à 6 lignes selon une approche thérapeutique centré
 
 ${aiPrompt2.split('### RÈGLES STRICTES DE STYLE')[1]}
 `;
+
+export const IMAGE_STYLES: { [key: string]: string } = {
+    cinematic: `Style: soft lighting, subtle shadows, emotional atmosphere, slightly surreal but grounded in reality.
+Color palette: deep blues, muted purples, warm golden highlights.
+Mood: introspective, calm, slightly mysterious.`,
+
+    watercolor: `Style: delicate watercolor painting, soft bleeding edges, translucent washes of color, visible paper texture.
+Color palette: pastel tones, gentle gradients, dreamy and ethereal.
+Mood: tender, fluid, nostalgic.`,
+
+    realistic: `Style: photorealistic, natural lighting, fine detail, lifelike textures.
+Color palette: naturalistic and balanced tones.
+Mood: grounded, immersive, true to life.`,
+
+    surreal: `Style: surrealist dreamlike imagery, impossible perspectives, melting forms, symbolic juxtapositions inspired by Magritte and Dali.
+Color palette: bold contrasts, unexpected color combinations.
+Mood: uncanny, hypnotic, otherworldly.`,
+
+    cartoon: `Style: vibrant cartoon illustration, bold outlines, flat colors with cel-shading, playful and expressive character design.
+Color palette: bright, saturated, cheerful tones.
+Mood: whimsical, lighthearted, fun.`,
+
+    anime: `Style: anime and manga illustration, expressive line art, dynamic shading, large expressive eyes, Japanese animation aesthetic.
+Color palette: vivid anime color grading, dramatic lighting.
+Mood: emotional, expressive, cinematic anime feel.`,
+};
