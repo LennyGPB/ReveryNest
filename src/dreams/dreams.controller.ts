@@ -53,25 +53,28 @@ export class DreamsController {
   @Post(':id/image')
   @Throttle({ default: { limit: 7, ttl: 86400000 } })
   async generateImage(@Request() req, @Param('id', new ParseUUIDPipe()) id: string) {
-    // 1. On cherche le rêve en base
-    const dream = await this.dreamsService.findOne(req.user.id, id);
+      const dream = await this.dreamsService.findOne(req.user.id, id);
 
-    if (!dream) {
-      throw new NotFoundException("Rêve non trouvé");
-    }
+      if (!dream) {
+          throw new NotFoundException("Rêve non trouvé");
+      }
 
       if (dream.content.length < 10) {
-      throw new BadRequestException("Le rêve est trop court pour générer une image.");
-    }
+          throw new BadRequestException("Le rêve est trop court pour générer une image.");
+      }
 
-    if (dream.imageURL) {
-      throw new BadRequestException("Une image a déjà été générée pour ce rêve.");
-    }
+      if (dream.imageURL) {
+          throw new BadRequestException("Une image a déjà été générée pour ce rêve.");
+      }
 
-    await this.dreamsService.checkImageUsage(req.user.id);
-    const imageUrl = await this.aiService.generateDreamImage(dream.content);
-    await this.dreamsService.update(req.user.id, id, imageUrl);
-    return { imageURL: imageUrl };
+      await this.dreamsService.checkImageUsage(req.user.id);
+
+      // Récupérer le style de l'utilisateur
+      const user = await this.dreamsService.getUserById(req.user.id);
+      const imageUrl = await this.aiService.generateDreamImage(dream.content, user?.imageStyle);
+      
+      await this.dreamsService.update(req.user.id, id, imageUrl);
+      return { imageURL: imageUrl };
   }
 
   @Post(':id/share')

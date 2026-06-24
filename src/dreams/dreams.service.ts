@@ -183,4 +183,11 @@ export class DreamsService {
           },
       });
   }
+
+  async getUserById(userId: string) {
+    return this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, imageStyle: true, plan: true },
+    });
+  }
 }
