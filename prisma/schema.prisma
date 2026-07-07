@@ -61,6 +61,10 @@ model Insight {
   preview       String
   fullContent   String
   category      String?
+  titleEN       String?
+  previewEN     String?
+  fullContentEN String?
+  categoryEN    String?
   publishedDate DateTime @default(now())
   isActive      Boolean @default(false)
   createdAt     DateTime @default(now())

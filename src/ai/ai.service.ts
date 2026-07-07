@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { aiPrompt, aiPrompt2, aiPromptLucidSignals, aiPromptJungian, aiPromptSpiritual, aiPromptTherapeutic, IMAGE_STYLES} from './ai_prompt';
+import { aiPrompt, aiPrompt2, aiPromptJungian, aiPromptSpiritual, aiPromptTherapeutic, aiPromptLucidSignals, IMAGE_STYLES, aiPrompt2EN, aiPromptJungianEN, aiPromptSpiritualEN, aiPromptTherapeuticEN, aiPromptLucidSignalsEN } from './ai_prompt';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import Anthropic from '@anthropic-ai/sdk'
 
@@ -47,18 +47,26 @@ export class AiService {
     }
   }
 
-  async analyzeDreamClaude(content: string, type: string = 'global'): Promise<any> {
+  async analyzeDreamClaude(content: string, type: string = 'global', lang: string = 'fr'): Promise<any> {
       try {
           const safeContent = content.slice(0, 1500);
 
-          const promptMap: { [key: string]: string } = {
+          const promptMapFR: { [key: string]: string } = {
               'global': aiPrompt2,
               'jungian': aiPromptJungian,
               'spiritual': aiPromptSpiritual,
               'therapeutic': aiPromptTherapeutic,
           };
 
-          const systemPrompt = promptMap[type] || aiPrompt2;
+          const promptMapEN: { [key: string]: string } = {
+              'global': aiPrompt2EN,
+              'jungian': aiPromptJungianEN,
+              'spiritual': aiPromptSpiritualEN,
+              'therapeutic': aiPromptTherapeuticEN,
+          };
+
+          const promptMap = lang === 'en' ? promptMapEN : promptMapFR;
+          const systemPrompt = promptMap[type] || promptMap['global'];
 
           const response = await this.anthropic.messages.create({
               model: 'claude-sonnet-4-5',
@@ -141,14 +149,16 @@ export class AiService {
     }
   }
 
-  async analyseLucidRitual(signalsData: any): Promise<any> {
+  async analyseLucidRitual(signalsData: any, lang: string = 'fr'): Promise<any> {
     try {
+      const systemPrompt = lang === 'en' ? aiPromptLucidSignalsEN : aiPromptLucidSignals;
+      
       const response = await this.openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: aiPromptLucidSignals
+            content: systemPrompt
           },
           {
             role: "user",

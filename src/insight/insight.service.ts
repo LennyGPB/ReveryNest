@@ -45,8 +45,19 @@ export class InsightService {
         });
     }
 
-    async create(title: string, preview: string, fullContent: string, publishedDate: Date, isActive: boolean) {
-        return this.prisma.insight.create({data: { title, preview, fullContent, publishedDate: new Date(publishedDate), isActive }, }); 
+    async create(
+        title: string, preview: string, fullContent: string, 
+        publishedDate: Date, isActive: boolean,
+        titleEN?: string, previewEN?: string, fullContentEN?: string, categoryEN?: string
+    ) {
+        return this.prisma.insight.create({
+            data: { 
+                title, preview, fullContent, 
+                publishedDate: new Date(publishedDate), 
+                isActive,
+                titleEN, previewEN, fullContentEN, categoryEN
+            }
+        }); 
     }
 
     async findRandomActive() {

@@ -25,4 +25,8 @@ export class CreateDreamDto {
   @IsString()
   @IsOptional()
   interpretationType?: string;
+
+  @IsString()
+  @IsOptional()
+  lang?: string;
 }

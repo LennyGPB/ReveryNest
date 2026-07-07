@@ -7,8 +7,9 @@ import { LucidService } from 'src/lucid/lucid.service';
 export class DreamsService {
   constructor(private prisma: PrismaService, private aiService: AiService, private lucidService: LucidService) {}
 
-  async create(userId: string, content: string, moods: string[], isLucid: boolean, interpretationType: string = 'global') {
+  async create(userId: string, content: string, moods: string[], isLucid: boolean, interpretationType: string = 'global', lang: string = 'fr') {
       let analysis;
+      
 
       if (content.trim().length < 10) {
           throw new BadRequestException('Le rêve doit contenir au moins 10 caractères.');
@@ -25,7 +26,7 @@ export class DreamsService {
       try {
           await this.checkAiUsage(userId);
           const safeContent = content.slice(0, 1500);
-          analysis = await this.aiService.analyzeDreamClaude(safeContent, interpretationType);
+          analysis = await this.aiService.analyzeDreamClaude(safeContent, interpretationType, lang);
       } catch (error) {
           console.error("AI analysis failed:", error);
           analysis = { intensity: 3, tags: null };
