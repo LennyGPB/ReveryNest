@@ -41,6 +41,7 @@ export class DreamsService {
               analysis,
               tags: analysis.tags ?? null,
               isLucid,
+              lang,
           },
       });
 
@@ -168,9 +169,9 @@ export class DreamsService {
       });
   }
 
-  async getPublicDreams() {
+  async getPublicDreams(lang: string = 'fr') {
       return this.prisma.dream.findMany({
-          where: { isPublic: true },
+          where: { isPublic: true, lang }, // 👈
           orderBy: { createdAt: 'desc' },
           select: {
               id: true,
@@ -180,7 +181,6 @@ export class DreamsService {
               analysis: true,
               imageURL: true,
               createdAt: true,
-              // PAS userId pour garder l'anonymat
           },
       });
   }

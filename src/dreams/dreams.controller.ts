@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request, Param, NotFoundException, BadRequestException, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request, Param, NotFoundException, BadRequestException, ParseUUIDPipe, Headers as NestHeaders } from '@nestjs/common';
 import { DreamsService } from './dreams.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AiService } from 'src/ai/ai.service';
@@ -39,8 +39,9 @@ export class DreamsController {
 
   @Get('public')
   @UseGuards(JwtAuthGuard)
-  getPublicDreams() {
-      return this.dreamsService.getPublicDreams();
+  getPublicDreams(@NestHeaders('accept-language') lang: string) {
+      const language = lang?.startsWith('en') ? 'en' : 'fr';
+      return this.dreamsService.getPublicDreams(language);
   }
 
   @Get(':id')

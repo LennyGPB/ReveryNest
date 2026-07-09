@@ -49,6 +49,7 @@ model Dream {
   imageURL      String?
   isLucid       Boolean  @default(false)
   isPublic Boolean @default(false)
+  lang String @default("fr")
   
   // Relation avec l'utilisateur
   userId        String
