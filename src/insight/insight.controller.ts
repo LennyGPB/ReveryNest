@@ -33,6 +33,7 @@ export class InsightController {
 
     @Get('daily')
     async getRandomActive(@Headers('accept-language') lang: string) {
+        console.log('LANG RECEIVED:', lang);
         const insight = await this.insightService.findDailyActive();
         
         if (!insight) {
