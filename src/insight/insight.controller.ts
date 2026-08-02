@@ -35,7 +35,11 @@ export class InsightController {
     async getRandomActive(@Headers('accept-language') lang: string) {
         console.log('LANG RECEIVED:', lang);
         const insight = await this.insightService.findDailyActive();
-        
+        console.log('INSIGHT titleEN:', insight?.titleEN);
+        console.log('INSIGHT previewEN:', insight?.previewEN);
+        console.log('INSIGHT fullContentEN:', insight?.fullContentEN);
+        console.log('INSIGHT categoryEN:', insight?.categoryEN);
+
         if (!insight) {
             return { insight: null, message: 'No insight available' };
         }
